@@ -1,0 +1,99 @@
+buildscript {
+    repositories {
+        gradlePluginPortal()
+    }
+    dependencies {
+        classpath 'io.jmix.gradle:jmix-gradle-plugin:1.7.1'
+    }
+}
+
+subprojects {
+    apply plugin: 'java-library'
+    apply plugin: 'maven-publish'
+    apply plugin: 'io.jmix'
+
+    repositories {
+        mavenLocal()
+        mavenCentral()
+        maven {
+            url 'https://global.repo.jmix.io/repository/public'
+        }
+        maven {
+            url = 'https://nexus.jmix.io/repository/public'
+        }
+    }
+
+    jmix {
+        bomVersion = '1.7.1'
+        projectId = 'dmb'
+    }
+
+    //#####################################################################################################################
+    //Основная часть номера версии, изменяемая осознанно вручную.
+    //Первый разряд - мажорная версия.
+    //Второй - минорная (небольшие функциональные дополнения).
+    //Третий разряд - патч.
+    //Далее "-SNAPSHOT" для предварительной версии и номер сборки  в формате "+build.XX"
+    //При сборке в GitLab вместо него используется BuildId конвейера.
+
+    group = 'ru.cs_consult'
+
+//    def snapshotMarker = '' //Для релизной локальной сборки значение переменной просто пустая строка
+//    def addonLocalBuildNumber = '+build.10'
+//
+//    //#####################################################################################################################
+//
+//    //Итоговый номер сборки. При сборке в GitLab формируется из CI_PIPELINE_IID (счетчик сборки в проекте) или
+//    // CI_PIPELINE_ID (глобальный счетчик сборки).
+//    // При локальной сборке эти переменные не определены и используется addonLocalBuildNumber
+//
+//    def addonFinalBuildNumber = System.getenv('CI_PIPELINE_IID') == null ? addonLocalBuildNumber : '+build.' + System.getenv('CI_PIPELINE_IID')
+//
+//    //При сборке в GitLab в переменой CI_COMMIT_BRANCH хранится имя целевой ветки на которой сработал конвейер по камиту
+//
+//    def targetBranch = System.getenv('CI_COMMIT_BRANCH')
+//
+//    //При запуске сборки в конвейре для любой ветки кроме master ставим метку предварительной версии.
+//    //При локальном запуске сборки начальное значение snapshotMarker не изменится
+//    snapshotMarker = targetBranch != null ? (targetBranch != 'master' ? '-SNAPSHOT' : '') : snapshotMarker
+//
+//    group = 'ru.cs_consult'
+//    version = version + snapshotMarker + ".${addonFinalBuildNumber}"
+
+    def props = new Properties()
+    buildFile.withInputStream { props.load(it) }
+    def subArchivesBaseName = props.getProperty('archivesBaseName')
+    def archName = subArchivesBaseName.substring(1, subArchivesBaseName.length() - 1)
+
+    java {
+        withSourcesJar()
+    }
+
+    artifacts {
+        archives sourcesJar
+    }
+
+    publishing {
+        repositories {
+            maven {
+                name = "GitHubPackages"
+                url = uri("https://maven.pkg.github.com/" + System.getenv("GITHUB_REPOSITORY"))
+                credentials {
+                    username = project.findProperty("gpr.user") ?: System.getenv("GITHUB_USERNAME")
+                    password = project.findProperty("gpr.key") ?: System.getenv("GITHUB_TOKEN")
+                }
+            }
+        }
+        publications {
+            javaMaven(MavenPublication) {
+                artifactId = archName
+                from components.java
+            }
+        }
+    }
+
+    // remove after https://youtrack.jetbrains.com/issue/IDEA-227215 is fixed
+    tasks.withType(GenerateModuleMetadata) {
+        enabled = false
+    }
+}

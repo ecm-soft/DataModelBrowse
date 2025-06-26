@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<menu-config xmlns="http://jmix.io/schema/ui/menu">
+
+    <menu id="application" caption="msg://ru.cs_consult.testproject/menu.application">
+        <item screen="tp_User.browse" caption="msg://ru.cs_consult.testproject.screen.user/UserBrowse.caption"/>
+        <item screen="themeSettingsScreen" caption="msg://io.jmix.ui.app.themesettings/themeSettings.caption"/>
+    </menu>
+    <menu id="administration">
+        <item screen="ui_JmxConsoleScreen"/>
+        <item screen="sys_LockInfo.browse"/>
+        <item screen="entityInspector.browse"/>
+        <item screen="sec_ResourceRoleModel.browse"
+              caption="msg://io.jmix.securityui/menu.sec_ResourceRoleModel.browse"/>
+        <item screen="sec_RowLevelRoleModel.browse"
+              caption="msg://io.jmix.securityui/menu.sec_RowLevelRoleModel.browse"/>
+    </menu>
+
+    <menu id="Help" icon="QUESTION" caption="msg://ru.cs_consult.testproject.menu/menu_config.Help">
+        <item screen="dmb_DataModelBrowseScreen"
+              caption="msg://ru.cs_consult.datamodelbrowseaddon.screen.datamodelbrowse/dataModelBrowseScreen.caption"/>
+    </menu>
+</menu-config>
